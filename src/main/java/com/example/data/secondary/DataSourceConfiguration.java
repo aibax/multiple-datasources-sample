@@ -1,4 +1,4 @@
-package com.example.data.primary;
+package com.example.data.secondary;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,32 +11,29 @@ import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.boot.orm.jpa.hibernate.SpringNamingStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration
+@Configuration(value = "secondaryDataSourceConfiguration")
 //@formatter:off
 @EnableJpaRepositories(
-    basePackageClasses = { PrimaryDataSourceConfiguration.class },
-    entityManagerFactoryRef = "primaryEntityManagerFactory",
-    transactionManagerRef = "primaryTransactionManager")
+    basePackageClasses = { DataSourceConfiguration.class },
+    entityManagerFactoryRef = "secondaryEntityManagerFactory",
+    transactionManagerRef = "secondaryTransactionManager")
 //@formatter:on
-public class PrimaryDataSourceConfiguration
+public class DataSourceConfiguration
 {
-    @Bean
-    @Primary
-    @ConfigurationProperties(prefix = "spring.datasource.primary")
+    @Bean(name = "secondaryDataSource")
+    @ConfigurationProperties(prefix = "spring.datasource.secondary")
     public DataSource dataSource()
     {
         return DataSourceBuilder.create().build();
     }
 
-    @Bean
-    @Primary
-    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(EntityManagerFactoryBuilder builder)
+    @Bean(name = "secondaryEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder builder)
     {
         /* [REQUIRED] hibernate.ejb.naming_strategy の設定が必須 */
         Map<String, Object> properties = new HashMap<>();
@@ -44,17 +41,16 @@ public class PrimaryDataSourceConfiguration
 
         //@formatter:off
         return builder.dataSource(dataSource())
-            .packages(PrimaryDataSourceConfiguration.class.getPackage().getName())
-            .persistenceUnit("primary")
+            .packages(DataSourceConfiguration.class.getPackage().getName())
+            .persistenceUnit("secondary")
             .properties(properties)
             .build();
         //@formatter:on
     }
 
-    @Bean
-    @Primary
-    public PlatformTransactionManager primaryTransactionManager(EntityManagerFactoryBuilder builder)
+    @Bean(name = "secondaryTransactionManager")
+    public PlatformTransactionManager transactionManager(EntityManagerFactoryBuilder builder)
     {
-        return new JpaTransactionManager(primaryEntityManagerFactory(builder).getObject());
+        return new JpaTransactionManager(entityManagerFactory(builder).getObject());
     }
 }
