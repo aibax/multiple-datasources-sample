@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    primary:
+      driverClassName: org.h2.Driver
+      url: jdbc:h2:file:./database/customerdb
+      username: sa
+      password:
+    secondary:
+      driverClassName: org.h2.Driver
+      url: jdbc:h2:file:./database/staffdb
+      username: sa
+      password:
+
+  jpa:
+    hibernate:
+      ddl-auto: none
