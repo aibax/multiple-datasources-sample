@@ -33,7 +33,7 @@ public class AppTest
     }
 
     @Test
-    public void testStaffRepositoryAutowire()
+    public void testStaffRepositoryAutowired()
     {
         assertNotNull(staffRepository);
     }
